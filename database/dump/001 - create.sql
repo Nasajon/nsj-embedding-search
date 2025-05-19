@@ -8,6 +8,8 @@ create table index_test (
     content text,
     reference jsonb,
     metadata jsonb,
+    chunck_number integer,
+    total_chunks integer,
     created_at timestamp default now(),
     updated_at timestamp default now(),
 );

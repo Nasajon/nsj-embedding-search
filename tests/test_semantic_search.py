@@ -26,7 +26,7 @@ class DummyDAO:
             self._first_call = False
             return [
                 {
-                    "external_id": "id1",
+                    "external_id": "0d1a8427-0330-4ac3-8d70-1df7abbce9b8",
                     "title": "Documento Teste",
                     "content": "chunk-1",
                     "reference": {},
@@ -38,7 +38,7 @@ class DummyDAO:
                     "updated_at": "2025-01-01",
                 },
                 {
-                    "external_id": "id1",
+                    "external_id": "4caf7fda-7a3c-47ca-8191-7f1d92f618e6",
                     "title": "Documento Teste",
                     "content": "chunk-2",
                     "reference": {},
@@ -124,7 +124,7 @@ def test_search_returns_expected_group(semantic_search):
 
     assert len(results) == 1
     res = results[0]
-    assert res.external_id == "id1"
+    assert res.external_id == "0d1a8427-0330-4ac3-8d70-1df7abbce9b8"
     assert res.title == "Documento Teste"
     assert res.content == "chunk-1chunk-2" or res.content.endswith("chunk-2")
     assert res.score == pytest.approx(0.9)

@@ -3,5 +3,8 @@
 
 .env
 *.pyc
+*.egg-info/
+
 __pycache__/
 database/data
+dist/

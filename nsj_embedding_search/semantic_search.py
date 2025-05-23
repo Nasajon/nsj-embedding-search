@@ -79,12 +79,12 @@ class SemanticSearch:
         # Retrieving, paginated, and calculating similarities
         results: SortedList[SearchResult] = SortedList(key=lambda x: x.score)
 
-        limit_results = 1000
+        limit_query_results = 1000
         aux_group = []
         aux_content = ""
 
         while True:
-            index = self._dao.list(metadata)
+            qtd, index = self._dao.get_list(metadata)
 
             for item in index:
                 aux_group.append(item)
@@ -160,15 +160,15 @@ class SemanticSearch:
                     results.add(result)
 
             ## If results list has the max results length, discard wich has the lower similarity
-            if len(results) > limit_results:
+            if len(results) > limit_query_results:
                 results.pop(0)
 
             ## If current page length lower than max page size
-            if len(index) < limit_results:
+            if qtd < limit_query_results:
                 break
 
         # Returning results
-        return reversed(list(results))
+        return list(reversed(list(results)))
 
     def combine_similarities(self, similarities: list[float], mode: MergeChunksMode):
 
@@ -177,11 +177,11 @@ class SemanticSearch:
 
         # Applying the selected merge mode
         if mode == MergeChunksMode.AVERAGE:
-            return np.mean(similarities, axis=0).tolist()[0]
+            return np.mean(similarities, axis=0, keepdims=True).tolist()[0]
         elif mode == MergeChunksMode.MAX:
-            return np.max(similarities, axis=0).tolist()[0]
+            return np.max(similarities, axis=0, keepdims=True).tolist()[0]
         elif mode == MergeChunksMode.MIN:
-            return np.min(similarities, axis=0).tolist()[0]
+            return np.min(similarities, axis=0, keepdims=True).tolist()[0]
         else:
             raise ValueError(f"Unknown merge mode: {mode}")
 
@@ -206,13 +206,14 @@ class SemanticSearch:
             self._dao.insert(
                 external_id=external_id,
                 title=title,
+                embedding=emb,
                 content=(
                     chuncks[i] if self._index_mode == IndexMode.CHUNCKED else content
                 ),
                 reference=reference,
                 metadata=metadata,
                 chunck_number=i + 1,
-                total_chunks=len(emb),
+                total_chunks=len(chuncks),
             )
 
     def _embedding_value(
@@ -229,7 +230,7 @@ class SemanticSearch:
             chunck_size = OPENAI_EMBEDDING_MODEL_LIMIT
 
         # Splitting text into chunks
-        chuncks = self._text_utils.slip_text(value, chunck_size)
+        _, chuncks = self._text_utils.slip_text(value, chunck_size)
 
         # Embedding and normalizing
         embeddings = []
@@ -239,6 +240,8 @@ class SemanticSearch:
                 embedding_model=OPENAI_EMBEDDING_MODEL,
             )
             emb = self._embedding_util.reduce_embedding_dimensions(emb)
+
+            embeddings.append(emb)
 
         # Combining embeddings if needed
         if combine_embeddings:

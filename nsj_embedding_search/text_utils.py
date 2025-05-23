@@ -1,6 +1,6 @@
 import tiktoken
 
-from nsj_embedding_search.settings import CHUNCK_SIZE, OPENAI_EMBEDDING_MODEL, logger
+from nsj_embedding_search.settings import OPENAI_EMBEDDING_MODEL, logger
 
 
 class TextUtils:
@@ -12,7 +12,7 @@ class TextUtils:
     ) -> tuple[list[str], list[str]]:
         """
         Quebra o texto da entrada "content" em partes cujo comprimento não exceda,
-        em quantidade de tokens, a constante CHUNCK_SIZE.
+        em quantidade de tokens, o parâmetro chunck_size.
 
         Retorna uma tupla de duas listas de string:
         - Primeira: Lista de strings com overlap de metade do tamanho das partes.
@@ -20,7 +20,7 @@ class TextUtils:
         """
 
         # Verificando se estoura o limite de tokens de cada parte
-        if self.count_tokens(content, OPENAI_EMBEDDING_MODEL) <= CHUNCK_SIZE:
+        if self.count_tokens(content, OPENAI_EMBEDDING_MODEL) <= chunck_size:
             return ([content], [content])
 
         pieces = []
@@ -37,7 +37,7 @@ class TextUtils:
             # Começando um novo buffer, caso haja estouro do limite
             if (
                 self.count_tokens(" ".join(buffer_overlap), OPENAI_EMBEDDING_MODEL)
-                >= CHUNCK_SIZE
+                >= chunck_size
             ):
                 pieces_overlap.append(" ".join(buffer_overlap[:-1]))
                 pieces.append(" ".join(buffer[:-1]))
@@ -52,11 +52,11 @@ class TextUtils:
                 # Garantindo que o próximo buffer não nasce já estourando o limite
                 while (
                     self.count_tokens(" ".join(buffer_overlap), OPENAI_EMBEDDING_MODEL)
-                    >= CHUNCK_SIZE
+                    >= chunck_size
                 ):
                     if len(buffer_overlap) <= 1:
                         logger.warning(
-                            f"Não é possível quebrar este texto em partes com no máximo {CHUNCK_SIZE} tokens. Uma parte do texto será truncada em 100 caracteres (para caber)."
+                            f"Não é possível quebrar este texto em partes com no máximo {chunck_size} tokens. Uma parte do texto será truncada em 100 caracteres (para caber)."
                         )
                         buffer_overlap[0] = buffer_overlap[0][:100]
                         buffer[0] = buffer[0][:100]

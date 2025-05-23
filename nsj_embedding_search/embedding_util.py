@@ -10,7 +10,7 @@ class EmbeddingUtil:
         resposta = openai.embeddings.create(model=embedding_model, input=[text])
         return resposta.data[0].embedding
 
-    def cosine_similarity(embedding1, embedding2):
+    def cosine_similarity(self, embedding1, embedding2):
         a = embedding1
         b = embedding2
 
@@ -68,10 +68,10 @@ class EmbeddingUtil:
 
         # Applying the selected merge mode
         if mode == MergeChunksMode.AVERAGE:
-            return np.mean(embeddings, axis=0).tolist()
+            return np.mean(embeddings, axis=0, keepdims=True).tolist()
         elif mode == MergeChunksMode.MAX:
-            return np.max(embeddings, axis=0).tolist()
+            return np.max(embeddings, axis=0, keepdims=True).tolist()
         elif mode == MergeChunksMode.MIN:
-            return np.min(embeddings, axis=0).tolist()
+            return np.min(embeddings, axis=0, keepdims=True).tolist()
         else:
             raise ValueError(f"Unknown merge mode: {mode}")

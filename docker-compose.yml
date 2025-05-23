@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+
+    postgres:
+        image: postgres:11.5
+        ports:
+            - "5440:5432"
+        restart: always
+        volumes:
+            - $PWD/database/dump:/docker-entrypoint-initdb.d/
+            # - $PWD/database/data:/var/lib/postgresql/data
+        environment:
+            - "POSTGRES_DB=projeto"
+            - "POSTGRES_USER=projeto"
+            - "POSTGRES_PASSWORD=mysecretpassword"

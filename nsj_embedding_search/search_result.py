@@ -19,3 +19,4 @@ class SearchResult:
     updated_at: datetime.datetime = None
     combined_embedding: list[float] = None
     chunks: list[ChunkResult] = None
+    tenant: int = None

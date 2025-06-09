@@ -10,6 +10,7 @@ create table index_test (
     metadata jsonb,
     chunck_number integer,
     total_chunks integer,
+    tenant integer not null default 0,
     created_at timestamp default now(),
     updated_at timestamp default now()
 );

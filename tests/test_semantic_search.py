@@ -100,13 +100,13 @@ def semantic_search(monkeypatch):
 )
 def test_combine_similarities_ok(mode, vals, expected):
     ss = SemanticSearch(dbconn=None, index_table="idx")
-    assert pytest.approx(ss.combine_similarities(vals, mode)) == expected
+    assert pytest.approx(ss._combine_similarities(vals, mode)) == expected
 
 
 def test_combine_similarities_unknown_mode():
     ss = SemanticSearch(dbconn=None, index_table="idx")
     with pytest.raises(ValueError):
-        ss.combine_similarities([[0.1]], "MODE_INVALIDO")  # qualquer valor não enum
+        ss._combine_similarities([[0.1]], "MODE_INVALIDO")  # qualquer valor não enum
 
 
 def test_search_returns_expected_group(semantic_search):

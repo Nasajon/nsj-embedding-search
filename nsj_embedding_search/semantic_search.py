@@ -47,6 +47,7 @@ class SemanticSearch:
         index_merge_chuncks_mode: MergeChunksMode = None,
         similarity_merge_chunks_mode: MergeChunksMode = MergeChunksMode.AVERAGE,
         similarity_threshold: float = 0.5,
+        tenant: int = 0,
     ) -> list[SearchResult]:
 
         # Embedding query
@@ -71,6 +72,7 @@ class SemanticSearch:
                 index_merge_chuncks_mode,
                 chuncks,
                 embeddings,
+                tenant,
             )
 
             if metadata2 is not None:
@@ -84,7 +86,7 @@ class SemanticSearch:
         aux_content = ""
 
         while True:
-            qtd, index = self._dao.get_list(metadata)
+            qtd, index = self._dao.get_list(metadata=metadata, tenant=tenant)
 
             for item in index:
                 aux_group.append(item)
@@ -124,7 +126,7 @@ class SemanticSearch:
                     if similarity_merge_chunks_mode is None:
                         similarity_merge_chunks_mode = MergeChunksMode.AVERAGE
 
-                    similarity = self.combine_similarities(
+                    similarity = self._combine_similarities(
                         similarities,
                         similarity_merge_chunks_mode,
                     )
@@ -144,6 +146,7 @@ class SemanticSearch:
                     result.updated_at = group[0]["updated_at"]
                     result.combined_embedding = group_embeddings[0]
                     result.chunks = []
+                    result.tenant = group[0]["tenant"]
 
                     for i, group_item in enumerate(group):
                         chunk_result = ChunkResult()
@@ -170,7 +173,7 @@ class SemanticSearch:
         # Returning results
         return list(reversed(list(results)))
 
-    def combine_similarities(self, similarities: list[float], mode: MergeChunksMode):
+    def _combine_similarities(self, similarities: list[float], mode: MergeChunksMode):
 
         # Converting to numpy array
         similarities = np.array(similarities)
@@ -192,6 +195,7 @@ class SemanticSearch:
         content: str,
         reference: dict[str, any],
         metadata: dict[str, any],
+        tenant: int = 0,
     ):
         # Embedding content
         embeddings, chuncks = self._embedding_value(
@@ -214,6 +218,7 @@ class SemanticSearch:
                 metadata=metadata,
                 chunck_number=i + 1,
                 total_chunks=len(chuncks),
+                tenant=tenant,
             )
 
     def _embedding_value(
